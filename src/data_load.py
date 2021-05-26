@@ -8,6 +8,7 @@ import json
 
 
 dataset_list = ['daily_dialog', 'empathetic_dialogues', 'persona_chat', 'blended_skill_talk']
+dataset_list = ['blended_skill_talk']
 
 
 def merge_data(tokenizer, train_frac):
@@ -43,14 +44,14 @@ def merge_data(tokenizer, train_frac):
 
 def save_data(dialogues, name, dialogue_split_line, data_dir):
     print(f"Saving {name} text file...")
-    with open(f"{data_dir}/{name}.txt", 'w') as f:
+    with open(f"{data_dir}/{name}.txt", 'w', encoding='utf-8') as f:
         for dialogue in tqdm(dialogues):
             for utter in dialogue:
                 f.write(f"{utter}\n")
             f.write(f"{dialogue_split_line}\n")
      
     print(f"Saving {name} idx file...")
-    with open(f"{data_dir}/{name}.id", 'w') as f:
+    with open(f"{data_dir}/{name}.id", 'w', encoding='utf-8') as f:
         for dialogue in tqdm(dialogues):
             for utter in dialogue:
                 token_ids = tokenizer(utter)['input_ids']

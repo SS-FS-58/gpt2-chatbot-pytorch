@@ -13,6 +13,11 @@ import time
 import copy
 import json
 
+# linux
+workedPath = "/var/lib/jenkins/workspace/NlpEngine/nlgengine"
+# windows
+if os.name =='nt':
+    workedPath = os.getcwd()
 
 class Manager():
     def __init__(self, config_path, mode, ckpt_name=None):
@@ -20,6 +25,15 @@ class Manager():
         with open(config_path, 'r') as f:
             self.config = json.load(f)
             
+        if os.name =='nt':
+            settings =self.config['job_settings_win']
+        else:
+            settings =self.config['job_settings_linux']
+
+        self.sourcePath = workedPath + settings['sourcePath']
+        self.resultPath = workedPath + settings['resultPath']
+        
+
         if self.config['device'] == "cuda":
             self.config['device'] = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         elif self.config['device'] == "cpu":
@@ -140,7 +154,55 @@ class Manager():
             print(f"Valid loss: {valid_loss} || Valid perplexity: {valid_ppl}")
               
         print("Training finished!")
-    
+    def deleteSourceFile(self, filename):
+        try:
+            os.remove(self.sourcePath + filename)
+            # shutil.move(self.sourcePath + filename, self.backupPath + filename)
+            return True
+        except Exception as e:
+
+            print(e)
+            return False
+
+    def saveTextfile(self, filename, save_text):
+        try:
+            file_name = self.resultPath + str(filename.split(".")[0]) + '.txt'
+            # file_name = os.path.join(self.resultPath, str(filename.split(".")[0]) + '_prepocessor.txt')
+            file1 = open(file_name,"w")#write mode 
+            file1.write(save_text) 
+            print('success save file!', file_name)
+            print('success save contents!', save_text)
+            file1.close()
+            self.deleteSourceFile(filename)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    def get_filename_text(self):
+        for filename in os.listdir(self.sourcePath):
+            file_name = os.path.join(self.sourcePath, filename)
+            if '.txt' in file_name:
+                try:
+                    try:
+                        file1 = open(file_name,"r", encoding='utf-8')#write mode 
+                        text = file1.read() 
+                    except Exception as e:
+                        print(e)
+                        file1 = open(file_name,"r", encoding='cp1252')#write mode 
+                        text = file1.read() 
+                    finally:
+                        file1.close()
+                    if text != "":
+                        self.current_filename = filename
+                        return text
+                    else:
+                        pass
+                except Exception as e:
+                    print(e)
+        self.current_filename = None
+        return None
+
     def validation(self):
         print("Validation processing...")
         self.model.eval()
@@ -171,8 +233,7 @@ class Manager():
         
               
     def inference(self):
-        print("Let's start!")
-        print(f"If you want to quit the conversation, please type \"{self.config['end_command']}\".")
+        
         self.model.eval()
         
         with torch.no_grad():
@@ -185,11 +246,10 @@ class Manager():
             while True:
                 if cur_speaker == 1:
                     cur_speaker_id = self.config['speaker1_id']
-                    utter = input("You: ")
+                    utter = self.get_filename_text()
                     
-                    if utter == self.config['end_command']:
-                        print("Bot: Good bye.")
-                        break
+                    if utter is None:
+                        continue
                     
                     input_id = [cur_speaker_id] + self.tokenizer.encode(utter)
                     
@@ -223,6 +283,7 @@ class Manager():
                     res = self.tokenizer.decode(output_id)
 
                     print(f"Bot: {res}")
+                    self.saveTextfile(self.current_filename, str(res))
                 
                 cur_speaker = copy.deepcopy(next_speaker)
                 t += 1

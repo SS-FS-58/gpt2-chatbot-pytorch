@@ -11,12 +11,29 @@
     "dialogue_split_line": "[END OF DIALOGUE]",
     "device": "cuda",
     "learning_rate": 5e-4,
-    "batch_size": 4,
+    "batch_size": 1,
     "num_epochs": 10,
     "max_len": 1024,
     "max_time": 5,
     "nucleus_p": 0.9,
     "ckpt_dir": "saved_models",
     "ckpt_name": "best_ckpt",
-    "end_command": "Abort!"
+    "end_command": "Abort!",
+    "job_settings":{
+        "monitoringgaps":100
+    },
+    "job_settings_win": {
+        "monitoringgaps":100,
+        "workedPath":"",
+        "sourcePath":"\\..\\backend\\nlpengine\\nlg_channel\\input\\",
+        "resultPath":"\\..\\backend\\nlpengine\\nlg_channel\\output\\",
+        "backupPath":"\\..\\backend\\nlpengine\\nlg_channel\\backup\\"
+    },
+    "job_settings_linux": {
+        "monitoringgaps":100,
+        "workedPath":"/var/lib/jenkins/workspace/NlpEngine/nlpengine",
+        "sourcePath":"/../../Backend/backend/nlpengine/nlg_channel/input/",
+        "resultPath":"/../../Backend/backend/nlpengine/nlg_channel/output/",
+        "backupPath":"/../../Backend/backend/nlpengine/nlg_channel/backup/"
+    }
 }
