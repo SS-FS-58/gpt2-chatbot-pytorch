@@ -14,7 +14,7 @@ import copy
 import json
 
 # linux
-workedPath = "/var/lib/jenkins/workspace/NlpEngine/nlgengine"
+workedPath = "/var/lib/jenkins/workspace/NlpEngine/nlgchatengine"
 # windows
 if os.name =='nt':
     workedPath = os.getcwd()
